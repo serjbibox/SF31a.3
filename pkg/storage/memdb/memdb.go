@@ -4,8 +4,8 @@ import (
 	"github.com/serjbibox/GoNews/pkg/models"
 )
 
-type DB []models.Task
+type DB []models.Post
 
-func NewMemDb() DB {
+func New() DB {
 	return DB{}
 }

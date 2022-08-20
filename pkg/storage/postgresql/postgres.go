@@ -33,7 +33,7 @@ func GetConnectionString() string {
 		DB_SSLMODE
 }
 
-func NewPostgresDB(constr string) (*pgxpool.Pool, error) {
+func New(constr string) (*pgxpool.Pool, error) {
 	ctx := context.Background()
 	db, err := pgxpool.Connect(ctx, constr)
 	if err != nil {

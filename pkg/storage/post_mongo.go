@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/serjbibox/GoNews/pkg/models"
@@ -32,13 +31,13 @@ func newPostMongodb(db *mongo.Client, ctx context.Context) Post {
 func (s *PostMongodb) Posts() ([]models.Post, error) {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
 	filter := bson.D{}
-	cur, err := collection.Find(context.Background(), filter)
+	cur, err := collection.Find(s.ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	defer cur.Close(context.Background())
+	defer cur.Close(s.ctx)
 	var data []models.Post
-	for cur.Next(context.Background()) {
+	for cur.Next(s.ctx) {
 		var l models.Post
 		err := cur.Decode(&l)
 		if err != nil {
@@ -52,11 +51,10 @@ func (s *PostMongodb) Posts() ([]models.Post, error) {
 func (s *PostMongodb) AddPost(p models.Post) error {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
 	p.MID = primitive.NewObjectIDFromTimestamp(time.Now())
-	res, err := collection.InsertOne(context.Background(), p)
+	_, err := collection.InsertOne(s.ctx, p)
 	if err != nil {
 		return err
 	}
-	log.Println(res.InsertedID.(primitive.ObjectID))
 	return nil
 }
 

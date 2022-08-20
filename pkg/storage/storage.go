@@ -1,9 +1,12 @@
 package storage
 
 import (
+	"context"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/serjbibox/GoNews/pkg/models"
 	"github.com/serjbibox/GoNews/pkg/storage/memdb"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Post interface {
@@ -19,12 +22,18 @@ type Storage struct {
 
 func NewStoragePostgres(db *pgxpool.Pool) *Storage {
 	return &Storage{
-		Post: NewPostPostgres(db),
+		Post: newPostPostgres(db),
 	}
 }
 
 func NewStorageMemDb(db memdb.DB) *Storage {
 	return &Storage{
-		Post: NewPostMemDb(db),
+		Post: newPostMemDb(db),
+	}
+}
+
+func NewStorageMongodb(db *mongo.Client, ctx context.Context) *Storage {
+	return &Storage{
+		Post: newPostMongodb(db, ctx),
 	}
 }

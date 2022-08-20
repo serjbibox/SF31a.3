@@ -5,16 +5,11 @@ import (
 	"github.com/serjbibox/GoNews/pkg/models"
 )
 
-const (
-	ID_TYPE = 1 + iota
-	NAME_TYPE
-)
-
 type PostPostgres struct {
 	db *pgxpool.Pool
 }
 
-func NewPostPostgres(db *pgxpool.Pool) Post {
+func newPostPostgres(db *pgxpool.Pool) Post {
 	return &PostPostgres{db: db}
 }
 

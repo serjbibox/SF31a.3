@@ -23,6 +23,6 @@ func (s *PostPostgres) AddPost(models.Post) error {
 func (s *PostPostgres) UpdatePost(models.Post) error {
 	return nil
 }
-func (s *PostPostgres) DeletePost(id int) error {
+func (s *PostPostgres) DeletePost(id interface{}) error {
 	return nil
 }

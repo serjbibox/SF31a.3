@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/serjbibox/GoNews/pkg/models"
 	"github.com/serjbibox/GoNews/pkg/storage"
 	"github.com/serjbibox/GoNews/pkg/storage/mongodb"
 )
@@ -26,10 +27,24 @@ func main() {
 	}
 	ilog.Println("dabases: ", databases)
 	log.Println("insert", s.AddPost(models.Post{
-		AuthorName: "Petro",
+		AuthorName: "PetroVasiliy",
 		Content:    "new post",
-	}))*/
-	ilog.Println(s.Posts())
+	}))
+	err = s.UpdatePost(models.Post{
+		MID:     "6300c2f7e422173e02acc184",
+		Title:   "updated title",
+		Content: "updated content",
+	})*/
+	err = s.Author.AddAuthor(models.Author{Name: "Pupkin"})
+	if err != nil {
+		elog.Println(err)
+	}
+	err = s.DeletePost("6300c4a94e96b592911ccb64")
+	if err != nil {
+		elog.Println(err)
+	}
+	//ilog.Println(s.Author.Authors())
+	//ilog.Println(s.Posts())
 	//s := storage.NewStoragePostgres(db)
 	//s.Posts()
 }

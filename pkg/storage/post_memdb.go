@@ -23,7 +23,7 @@ func (s *PostMemdb) AddPost(models.Post) error {
 func (s *PostMemdb) UpdatePost(models.Post) error {
 	return nil
 }
-func (s *PostMemdb) DeletePost(id int) error {
+func (s *PostMemdb) DeletePost(id interface{}) error {
 	return nil
 }
 

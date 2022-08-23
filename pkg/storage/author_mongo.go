@@ -23,7 +23,7 @@ func newAuthorMongodb(db *mongo.Client, ctx context.Context) Author {
 	}
 }
 
-func (s *AuthorMongodb) Authors() ([]models.Author, error) {
+func (s *AuthorMongodb) GetAll() ([]models.Author, error) {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)
 	filter := bson.D{}
 	cur, err := collection.Find(s.ctx, filter)
@@ -43,9 +43,9 @@ func (s *AuthorMongodb) Authors() ([]models.Author, error) {
 	return data, cur.Err()
 }
 
-func (s *AuthorMongodb) AddAuthor(a models.Author) error {
+func (s *AuthorMongodb) Create(a models.Author) error {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)
-	a.MongoID = primitive.NewObjectIDFromTimestamp(time.Now()).Hex()
+	a.ID = primitive.NewObjectIDFromTimestamp(time.Now()).Hex()
 	_, err := collection.InsertOne(s.ctx, a)
 	if err != nil {
 		return err
@@ -53,11 +53,7 @@ func (s *AuthorMongodb) AddAuthor(a models.Author) error {
 	return nil
 }
 
-func (s *AuthorMongodb) DeleteAuthor(id interface{}) error {
-	id, err := primitive.ObjectIDFromHex(id.(string))
-	if err != nil {
-		return err
-	}
+func (s *AuthorMongodb) Delete(id string) error {
 	filter := bson.D{primitive.E{Key: "_id", Value: id}}
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)
 	res, err := collection.DeleteOne(s.ctx, filter)
@@ -65,7 +61,7 @@ func (s *AuthorMongodb) DeleteAuthor(id interface{}) error {
 		return err
 	}
 	if res.DeletedCount == 0 {
-		return errors.New("no tasks to delete")
+		return errors.New("no author to delete")
 	}
 	return nil
 }

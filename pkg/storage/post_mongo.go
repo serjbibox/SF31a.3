@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/serjbibox/GoNews/pkg/models"
@@ -30,7 +30,7 @@ func newPostMongodb(db *mongo.Client, ctx context.Context) Post {
 	}
 }
 
-func (s *PostMongodb) Posts() ([]models.Post, error) {
+func (s *PostMongodb) GetAll() ([]models.Post, error) {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
 	filter := bson.D{}
 	cur, err := collection.Find(s.ctx, filter)
@@ -40,54 +40,71 @@ func (s *PostMongodb) Posts() ([]models.Post, error) {
 	defer cur.Close(s.ctx)
 	var data []models.Post
 	for cur.Next(s.ctx) {
-		var l models.Post
-		err := cur.Decode(&l)
+		var p models.Post
+		err := cur.Decode(&p)
 		if err != nil {
 			return nil, err
 		}
-		data = append(data, l)
+
+		collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)
+		filter := bson.D{primitive.E{Key: "_id", Value: p.AuthorID}}
+		cur := collection.FindOne(s.ctx, filter)
+		var a models.Author
+		err = cur.Decode(&a)
+		if err != nil {
+			return nil, err
+		}
+		p.AuthorName = a.Name
+
+		data = append(data, p)
 	}
 	return data, cur.Err()
 }
 
-func (s *PostMongodb) AddPost(p models.Post) error {
-	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
-	p.MongoID = primitive.NewObjectIDFromTimestamp(time.Now()).Hex()
-	_, err := collection.InsertOne(s.ctx, p)
+func (s *PostMongodb) Create(p models.Post) (string, error) {
+	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)
+	filter := bson.D{primitive.E{Key: "_id", Value: p.AuthorID}}
+	cur := collection.FindOne(s.ctx, filter)
+	var a models.Author
+	err := cur.Decode(&a)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	p.AuthorName = a.Name
+	p.CreatedAt = int64(primitive.Timestamp{T: uint32(time.Now().Unix())}.T)
+
+	collection = s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
+	p.ID = primitive.NewObjectIDFromTimestamp(time.Now()).Hex()
+	_, err = collection.InsertOne(s.ctx, p)
+	if err != nil {
+		return "", err
+	}
+	log.Println("add new post with id:", p.ID)
+	return p.ID, nil
 }
 
-func (s *PostMongodb) UpdatePost(p models.Post) error {
+func (s *PostMongodb) Update(p models.Post) error {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
-	id, _ := primitive.ObjectIDFromHex(p.MongoID)
-	result, err := collection.UpdateOne(
+	res, err := collection.UpdateOne(
 		s.ctx,
-		bson.M{"_id": id},
+		bson.M{"_id": p.ID},
 		bson.D{
 			{Key: "$set", Value: bson.D{
 				{Key: "title", Value: p.Title},
 				{Key: "content", Value: p.Content},
 				{Key: "author_id", Value: p.AuthorID},
-				{Key: "name", Value: p.AuthorName},
 			}},
 		},
 	)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Updated %v Documents!\n", result.ModifiedCount)
-
+	log.Println(res)
 	return nil
 }
 
-func (s *PostMongodb) DeletePost(id interface{}) error {
-	id, err := primitive.ObjectIDFromHex(id.(string))
-	if err != nil {
-		return err
-	}
+func (s *PostMongodb) Delete(id string) error {
 	filter := bson.D{primitive.E{Key: "_id", Value: id}}
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
 	res, err := collection.DeleteOne(s.ctx, filter)
@@ -95,7 +112,7 @@ func (s *PostMongodb) DeletePost(id interface{}) error {
 		return err
 	}
 	if res.DeletedCount == 0 {
-		return errors.New("no tasks to delete")
+		return errors.New("no post to delete")
 	}
 	return nil
 }

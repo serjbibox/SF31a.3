@@ -10,16 +10,16 @@ import (
 )
 
 type Author interface {
-	AddAuthor(a models.Author) error
-	DeleteAuthor(id interface{}) error
-	Authors() ([]models.Author, error)
+	Create(a models.Author) error
+	Delete(id string) error
+	GetAll() ([]models.Author, error)
 }
 
 type Post interface {
-	Posts() ([]models.Post, error)   // получение всех публикаций
-	AddPost(models.Post) error       // создание новой публикации
-	UpdatePost(models.Post) error    // обновление публикации
-	DeletePost(id interface{}) error // удаление публикации по ID
+	GetAll() ([]models.Post, error)            // получение всех публикаций
+	Create(models.Post) (id string, err error) // создание новой публикации
+	Update(models.Post) error                  // обновление публикации
+	Delete(id string) error                    // удаление публикации по ID
 }
 
 type Storage struct {

@@ -13,17 +13,17 @@ func newPostMemDb(db memdb.DB) Post {
 	return &PostMemdb{db: db}
 }
 
-func (s *PostMemdb) Posts() ([]models.Post, error) {
+func (s *PostMemdb) GetAll() ([]models.Post, error) {
 	return posts, nil
 }
 
-func (s *PostMemdb) AddPost(models.Post) error {
+func (s *PostMemdb) Create(models.Post) (string, error) {
+	return "", nil
+}
+func (s *PostMemdb) Update(models.Post) error {
 	return nil
 }
-func (s *PostMemdb) UpdatePost(models.Post) error {
-	return nil
-}
-func (s *PostMemdb) DeletePost(id interface{}) error {
+func (s *PostMemdb) Delete(id string) error {
 	return nil
 }
 

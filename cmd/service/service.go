@@ -9,7 +9,7 @@ import (
 
 	"github.com/serjbibox/GoNews/pkg/handler"
 	"github.com/serjbibox/GoNews/pkg/storage"
-	"github.com/serjbibox/GoNews/pkg/storage/postgresql"
+	"github.com/serjbibox/GoNews/pkg/storage/mongodb"
 )
 
 var elog = log.New(os.Stderr, "service error\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -37,17 +37,24 @@ func (s *Server) Run(port string, handler http.Handler) error {
 }
 
 func main() {
-	//db, err := mongodb.New(ctx)
-	//if err != nil {
-	//	elog.Println(err)
-	//}
-	//defer db.Disconnect(ctx)
-	//s := storage.NewStorageMongodb(db, ctx)
-	db, err := postgresql.New(postgresql.GetConnectionString())
+	var err error
+
+	db, err := mongodb.New(ctx)
 	if err != nil {
 		elog.Println(err)
 	}
-	s := storage.NewStoragePostgres(db)
+	defer db.Disconnect(ctx)
+	s := storage.NewStorageMongodb(ctx, db)
+
+	//db, err := postgresql.New(postgresql.GetConnectionString())
+	//if err != nil {
+	//	elog.Println(err)
+	//}
+	//defer db.Close()
+	//s := storage.NewStoragePostgres(ctx, db)
+
+	//db := memdb.New()
+	//s := storage.NewStorageMemDb(db)
 	handlers := handler.New(s)
 	srv := new(Server)
 	err = srv.Run(HTTP_PORT, handlers.InitRoutes())

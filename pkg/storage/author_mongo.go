@@ -16,7 +16,7 @@ type AuthorMongodb struct {
 	ctx context.Context
 }
 
-func newAuthorMongodb(db *mongo.Client, ctx context.Context) Author {
+func newAuthorMongodb(ctx context.Context, db *mongo.Client) Author {
 	return &AuthorMongodb{
 		db:  db,
 		ctx: ctx,

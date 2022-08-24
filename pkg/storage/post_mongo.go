@@ -23,7 +23,7 @@ type PostMongodb struct {
 	ctx context.Context
 }
 
-func newPostMongodb(db *mongo.Client, ctx context.Context) Post {
+func newPostMongodb(ctx context.Context, db *mongo.Client) Post {
 	return &PostMongodb{
 		db:  db,
 		ctx: ctx,

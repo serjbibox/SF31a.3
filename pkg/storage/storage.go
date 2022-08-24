@@ -16,10 +16,10 @@ type Author interface {
 }
 
 type Post interface {
-	GetAll() ([]models.Post, error)            // получение всех публикаций
-	Create(models.Post) (id string, err error) // создание новой публикации
-	Update(models.Post) error                  // обновление публикации
-	Delete(id string) error                    // удаление публикации по ID
+	GetAll() ([]models.Post, error)
+	Create(models.Post) (id string, err error)
+	Update(models.Post) error
+	Delete(id string) error
 }
 
 type Storage struct {
@@ -27,9 +27,9 @@ type Storage struct {
 	Author
 }
 
-func NewStoragePostgres(db *pgxpool.Pool) *Storage {
+func NewStoragePostgres(ctx context.Context, db *pgxpool.Pool) *Storage {
 	return &Storage{
-		Post: newPostPostgres(db),
+		Post: newPostPostgres(ctx, db),
 	}
 }
 
@@ -39,9 +39,9 @@ func NewStorageMemDb(db memdb.DB) *Storage {
 	}
 }
 
-func NewStorageMongodb(db *mongo.Client, ctx context.Context) *Storage {
+func NewStorageMongodb(ctx context.Context, db *mongo.Client) *Storage {
 	return &Storage{
-		Post:   newPostMongodb(db, ctx),
-		Author: newAuthorMongodb(db, ctx),
+		Post:   newPostMongodb(ctx, db),
+		Author: newAuthorMongodb(ctx, db),
 	}
 }

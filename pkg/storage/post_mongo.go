@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"errors"
-	"log"
 	"time"
 
 	"github.com/serjbibox/GoNews/pkg/models"
@@ -18,11 +17,13 @@ const (
 	MONGO_AUTHORS = "authors"
 )
 
+//Объект, реализующий интерфейс работы с коллекцией posts MongoDB.
 type PostMongodb struct {
 	db  *mongo.Client
 	ctx context.Context
 }
 
+//Конструктор PostMongodb
 func newPostMongodb(ctx context.Context, db *mongo.Client) Post {
 	return &PostMongodb{
 		db:  db,
@@ -30,6 +31,7 @@ func newPostMongodb(ctx context.Context, db *mongo.Client) Post {
 	}
 }
 
+// получение всех публикаций
 func (s *PostMongodb) GetAll() ([]models.Post, error) {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
 	filter := bson.D{}
@@ -61,6 +63,7 @@ func (s *PostMongodb) GetAll() ([]models.Post, error) {
 	return data, cur.Err()
 }
 
+// создание новой публикации
 func (s *PostMongodb) Create(p models.Post) (string, error) {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)
 	filter := bson.D{primitive.E{Key: "_id", Value: p.AuthorID}}
@@ -80,10 +83,11 @@ func (s *PostMongodb) Create(p models.Post) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Println("add new post with id:", p.ID)
+	ilog.Println("add new post with id:", p.ID)
 	return p.ID, nil
 }
 
+// обновление публикации
 func (s *PostMongodb) Update(p models.Post) error {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)
 	res, err := collection.UpdateOne(
@@ -100,10 +104,11 @@ func (s *PostMongodb) Update(p models.Post) error {
 	if err != nil {
 		return err
 	}
-	log.Println(res)
+	ilog.Println(res)
 	return nil
 }
 
+// удаление публикации по ID
 func (s *PostMongodb) Delete(id string) error {
 	filter := bson.D{primitive.E{Key: "_id", Value: id}}
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_POSTS)

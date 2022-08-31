@@ -4,12 +4,13 @@ import (
 	"context"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"time"
 
 	"github.com/serjbibox/GoNews/pkg/handler"
 	"github.com/serjbibox/GoNews/pkg/storage"
-	"github.com/serjbibox/GoNews/pkg/storage/mongodb"
+	"github.com/serjbibox/GoNews/pkg/storage/postgresql"
 )
 
 var elog = log.New(os.Stderr, "service error\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -38,27 +39,42 @@ func (s *Server) Run(port string, handler http.Handler) error {
 
 func main() {
 	var err error
-
-	db, err := mongodb.New(ctx)
+	connString, err := postgresql.GetConnectionString()
 	if err != nil {
-		elog.Println(err)
+		elog.Fatal(err)
 	}
-	defer db.Disconnect(ctx)
-	s := storage.NewStorageMongodb(ctx, db)
+	db, err := postgresql.New(connString)
+	if err != nil {
+		elog.Fatal(err)
+	}
+	defer db.Close()
+	s, err := storage.NewStoragePostgres(ctx, db)
+	if err != nil {
+		elog.Fatal(err)
+	}
 
-	//db, err := postgresql.New(postgresql.GetConnectionString())
+	//db, err := mongodb.New(ctx)
 	//if err != nil {
-	//	elog.Println(err)
+	//	elog.Fatal(err)
 	//}
-	//defer db.Close()
-	//s := storage.NewStoragePostgres(ctx, db)
+	//defer db.Disconnect(ctx)
+	//s, err := storage.NewStorageMongodb(ctx, db)
+	//if err != nil {
+	//	elog.Fatal(err)
+	//}
 
-	//db := memdb.New()
-	//s := storage.NewStorageMemDb(db)
-	handlers := handler.New(s)
-	srv := new(Server)
-	err = srv.Run(HTTP_PORT, handlers.InitRoutes())
+	//db, err := memdb.New()
+	//if err != nil {
+	//	elog.Fatal(err)
+	//}
+	//s, err := storage.NewStorageMemDb(db)
+	//if err != nil {
+	//	elog.Fatal(err)
+	//}
+	handlers, err := handler.New(s)
 	if err != nil {
-		elog.Fatalf("error occured while running http server: %s", err.Error())
+		elog.Fatal(err)
 	}
+	srv := new(Server)
+	elog.Fatal(srv.Run(HTTP_PORT, handlers.InitRoutes()))
 }

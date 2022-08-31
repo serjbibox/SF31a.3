@@ -11,11 +11,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+//Объект, реализующий интерфейс работы с коллекцией authors MongoDB.
 type AuthorMongodb struct {
 	db  *mongo.Client
 	ctx context.Context
 }
 
+//Конструктор AuthorMongodb
 func newAuthorMongodb(ctx context.Context, db *mongo.Client) Author {
 	return &AuthorMongodb{
 		db:  db,
@@ -23,6 +25,7 @@ func newAuthorMongodb(ctx context.Context, db *mongo.Client) Author {
 	}
 }
 
+// получение всех авторов
 func (s *AuthorMongodb) GetAll() ([]models.Author, error) {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)
 	filter := bson.D{}
@@ -43,6 +46,7 @@ func (s *AuthorMongodb) GetAll() ([]models.Author, error) {
 	return data, cur.Err()
 }
 
+// создание нового автора
 func (s *AuthorMongodb) Create(a models.Author) error {
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)
 	a.ID = primitive.NewObjectIDFromTimestamp(time.Now()).Hex()
@@ -53,6 +57,7 @@ func (s *AuthorMongodb) Create(a models.Author) error {
 	return nil
 }
 
+// удаление автора по ID
 func (s *AuthorMongodb) Delete(id string) error {
 	filter := bson.D{primitive.E{Key: "_id", Value: id}}
 	collection := s.db.Database(MONGO_NEWS_DB).Collection(MONGO_AUTHORS)

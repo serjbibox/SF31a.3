@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 
@@ -20,7 +21,12 @@ const (
 var elog = log.New(os.Stderr, "mongodb error\t", log.Ldate|log.Ltime|log.Lshortfile)
 var ilog = log.New(os.Stdout, "mongodb info\t", log.Ldate|log.Ltime)
 
+//Конструктор клиента MongoDB
 func New(ctx context.Context) (*mongo.Client, error) {
+	if ctx == nil {
+		elog.Println("context is nil")
+		return nil, errors.New("context is nil")
+	}
 	mongoOpts := options.Client().ApplyURI(DB_NAME + "://" + DB_HOST + ":" + DB_PORT + "/")
 	client, err := mongo.Connect(ctx, mongoOpts)
 	if err != nil {

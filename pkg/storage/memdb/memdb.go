@@ -4,12 +4,14 @@ import (
 	"github.com/serjbibox/GoNews/pkg/models"
 )
 
+//Объект хранилища данных в памяти
 type DB []models.Post
 
-func New() DB {
+//Конструктор хранилища данных в памяти
+func New() (DB, error) {
 	db := DB{}
 	db = append(db, posts[0], posts[1])
-	return db
+	return db, nil
 }
 
 var posts = []models.Post{

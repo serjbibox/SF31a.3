@@ -10,11 +10,13 @@ import (
 	"github.com/serjbibox/GoNews/pkg/models"
 )
 
+//Объект, реализующий интерфейс работы с таблицей posts PostgreSQL.
 type PostPostgres struct {
 	db  *pgxpool.Pool
 	ctx context.Context
 }
 
+//Конструктор PostPostgres
 func newPostPostgres(ctx context.Context, db *pgxpool.Pool) Post {
 	return &PostPostgres{
 		db:  db,
@@ -22,6 +24,7 @@ func newPostPostgres(ctx context.Context, db *pgxpool.Pool) Post {
 	}
 }
 
+// получение всех публикаций
 func (s *PostPostgres) GetAll() ([]models.Post, error) {
 	var posts []models.Post
 	query := `
@@ -61,6 +64,7 @@ func (s *PostPostgres) GetAll() ([]models.Post, error) {
 	return posts, rows.Err()
 }
 
+// создание новой публикации
 func (s *PostPostgres) Create(p models.Post) (string, error) {
 	tx, err := s.db.Begin(s.ctx)
 	if err != nil {
@@ -91,6 +95,7 @@ func (s *PostPostgres) Create(p models.Post) (string, error) {
 	return strconv.Itoa(id), tx.Commit(s.ctx)
 }
 
+// обновление публикации
 func (s *PostPostgres) Update(p models.Post) error {
 	id, err := strconv.Atoi(p.ID)
 	if err != nil {
@@ -118,6 +123,8 @@ func (s *PostPostgres) Update(p models.Post) error {
 	}
 	return nil
 }
+
+// удаление публикации по ID
 func (s *PostPostgres) Delete(id string) error {
 	delId, err := strconv.Atoi(id)
 	if err != nil {

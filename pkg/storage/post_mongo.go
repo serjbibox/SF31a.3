@@ -116,6 +116,7 @@ func (s *PostMongodb) Delete(id string) error {
 	if err != nil {
 		return err
 	}
+
 	if res.DeletedCount == 0 {
 		return errors.New("no post to delete")
 	}

@@ -7,10 +7,10 @@ CREATE TABLE authors (
 
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
-    author_id INTEGER REFERENCES authors(id) NOT NULL,
+    author_id INTEGER REFERENCES authors(id),
     title TEXT  NOT NULL,
-    content TEXT NOT NULL,
-    created_at BIGINT NOT NULL
+    content TEXT,
+    created_at BIGINT
 );
 
 INSERT INTO authors (id, name) VALUES (0, 'Дмитрий');
